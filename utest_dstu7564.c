@@ -120,6 +120,9 @@ static void test2_dstu7564(void)
 
     ASSERT_EQUALS_BA(expected, actual);
 
+    ba_print(stdout, data);
+    ba_print(stdout, actual);
+
 cleanup:
 
     dstu7564_free(ctx);
@@ -144,6 +147,9 @@ static void test3_dstu7564(void)
     ASSERT_RET_OK(dstu7564_final(ctx, &actual));
 
     ASSERT_EQUALS_BA(expected, actual);
+
+    ba_print(stdout, data);
+    ba_print(stdout, actual);
 
 cleanup:
 
