@@ -591,10 +591,8 @@ void dstu7564_free(Dstu7564Ctx *ctx)
     if (ctx) {
         ctx->is_inited = false;
         if (ctx->hmac != NULL) {
-            secure_zero(ctx->hmac, sizeof(Dstu7564Hmac));
             free(ctx->hmac);
         }
-        secure_zero(ctx, sizeof(Dstu7564Ctx));
         free(ctx);
     }
 }
