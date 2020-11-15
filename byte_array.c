@@ -126,17 +126,6 @@ cleanup:
 }
 
 
-int ba_swap(const ByteArray *a)
-{
-    int ret = RET_OK;
-
-    CHECK_PARAM(a != NULL);
-    DO(uint8_swap(a->buf, a->len, a->buf, a->len));
-
-cleanup:
-
-    return ret;
-}
 
 int ba_cmp(const ByteArray *a, const ByteArray *b)
 {
@@ -195,23 +184,6 @@ cleanup:
     return ret;
 }
 
-int ba_copy(const ByteArray *in, size_t in_off, size_t len, ByteArray *out, size_t out_off)
-{
-    int ret = RET_OK;
-
-    CHECK_PARAM(in != NULL);
-    CHECK_PARAM(out != NULL);
-
-    if (len == 0) {
-        len = in->len - in_off;
-    }
-    CHECK_PARAM(in_off + len <= in->len);
-    CHECK_PARAM(out_off + len <= out->len);
-
-    memcpy(&out->buf[out_off], &in->buf[in_off], len);
-cleanup:
-    return ret;
-}
 
 int ba_print(FILE *stream, const ByteArray *ba)
 {

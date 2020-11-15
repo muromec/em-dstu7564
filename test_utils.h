@@ -10,8 +10,7 @@
 #include <time.h>
 
 #include "byte_array.h"
-/*#include "prng.h"*/
-#include "word_internal.h"
+#include "byte_array_internal.h"
 #include "cryptonite_errors.h"
 
 
@@ -155,7 +154,6 @@ unsigned int LOOP_NUM;
 bool assert_true_core(bool expression, char *file, int line);
 bool assert_ret_ok_core(int ret, char *file, int line);
 bool assert_ret_core(int exp_ret, int act_ret, char *file, int line);
-bool assert_equals_wa_core(WordArray *expected, WordArray *actual, char *file, int line);
 bool assert_equals_ba_core(ByteArray *expected, ByteArray *actual, char *file, int line);
 bool assert_equals_size_t_core(size_t expected, size_t actual, char *file, int line);
 bool assert_equals_str_core(const char *expected, const char *actual, char *file, int line);
@@ -167,9 +165,6 @@ const char *location_cut(const char *file);
 ByteArray *ba_alloc_from_be_hex_string(const char *data);
 void ba_free_many(int num, ...);
 
-WordArray *wa_alloc_from_le_hex_string(const char *data);
-WordArray *wa_alloc_from_be_hex_string(const char *data);
-void wa_print_be(const WordArray *a);
 
 TableBuilder *table_builder_alloc(size_t lib_num);
 
