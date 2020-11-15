@@ -94,10 +94,6 @@ typedef enum {
     WHITE,
 } COLOR_en;
 
-size_t data_size_byte;
-
-unsigned int LOOP_NUM;
-
 #define PR(...)        printf(__VA_ARGS__); fflush(stdout)
 
 #define ASN_EXECUTE(ret) ASSERT_RET_OK(ret.code); goto cleanup;
