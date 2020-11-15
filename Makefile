@@ -11,14 +11,17 @@ TEST=utest.o utest_dstu7564.o test_utils.o
 
 dstu7564.js: $(LIBS)
 	$(CC) -o $@ $^ \
+	-s MODULARIZE	\
 	-s EXPORTED_FUNCTIONS="[ \
+          '_malloc', \
+          '_free', \
           '_dstu7564_alloc', \
           '_dstu7564_init', \
           '_dstu7564_free', \
           '_dstu7564_update', \
           '_dstu7564_final' \
         ]" \
-	-s 'EXPORT_NAME="emdstu7564"' \
+	-s EXPORT_NAME="emdstu7564" \
 	-s NO_EXIT_RUNTIME=1 -O3
 
 utest: $(LIBS) $(TEST)
