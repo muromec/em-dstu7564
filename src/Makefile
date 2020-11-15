@@ -22,16 +22,15 @@ dstu7564.js: $(LIBS)
           '_dstu7564_final' \
         ]" \
 	-s EXPORT_NAME="emdstu7564" \
-	-s NO_EXIT_RUNTIME=1 -O3 \
-	-s WASM=0
+	-s NO_EXIT_RUNTIME=1 -O3
 
 utest: $(LIBS) $(TEST)
 	$(CC) -o $@ $^
 
-all: dstu7564.js
+all: dstu7564.js dstu7564.wasm
 
-export: dstu7564.js
-	mv $< ../dist/$<
+export: dstu7564.js dstu7564.wasm
+	mv $^ ../dist/
 
 clean:
 	rm -f *.o utest dstu7564.js dstu7564.wasm

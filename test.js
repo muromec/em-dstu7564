@@ -1,4 +1,4 @@
-const getdstu7564 = require('./dstu7564.js');
+const getdstu7564 = require('./dist/dstu7564.js');
 
 function copyTo(c, buffer) {
   const ptr = c._malloc(buffer.length);
