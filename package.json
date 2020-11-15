@@ -1,0 +1,11 @@
+{
+  "name": "em-dstu7564",
+  "version": "1.0.0",
+  "description": "dstu7564 hash implementation from privat-it/cryptonite compiled with emscripten",
+  "main": "dist/wrapper.js",
+  "scripts": {
+    "test": "test.js"
+  },
+  "author": "",
+  "license": "BSD-2-Clause"
+}
