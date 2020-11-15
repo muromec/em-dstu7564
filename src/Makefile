@@ -1,4 +1,4 @@
-CC=gcc
+CC=emcc
 CFLAGS=-I. -DCRYPTONITE_EXPORT=
 
 LIBS=subrowcol.o byte_utils_internal.o dstu7564.o
@@ -22,10 +22,17 @@ dstu7564.js: $(LIBS)
           '_dstu7564_final' \
         ]" \
 	-s EXPORT_NAME="emdstu7564" \
-	-s NO_EXIT_RUNTIME=1 -O3
+	-s NO_EXIT_RUNTIME=1 -O3 \
+	-s WASM=0
 
 utest: $(LIBS) $(TEST)
 	$(CC) -o $@ $^
 
+all: dstu7564.js
+
+export: dstu7564.js
+	mv $< ../dist/$<
+
 clean:
-	rm *.o utest
+	rm -f *.o utest dstu7564.js dstu7564.wasm
+
