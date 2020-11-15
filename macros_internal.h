@@ -9,7 +9,6 @@
 #include <stdlib.h>
 
 #include "cryptonite_errors.h"
-#include "stacktrace.h"
 
 /**
  * У тілі функції обов'язково повинна бути
@@ -23,7 +22,6 @@
     {                                                    \
         ret = (func);                                    \
         if (ret != RET_OK) {                             \
-            ERROR_ADD(ret);                              \
             goto cleanup;                                \
         }                                                \
     }
@@ -40,7 +38,6 @@
     {                                                    \
         if (NULL == (_buffer = malloc(_len))) {          \
             ret = RET_MEMORY_ALLOC_ERROR;                \
-            ERROR_CREATE(ret);                           \
             goto cleanup;                                \
         }                                                \
     }
@@ -57,7 +54,6 @@
     {                                                    \
         if (NULL == (_buffer = calloc(1, _len))) {       \
             ret = RET_MEMORY_ALLOC_ERROR;                \
-            ERROR_CREATE(ret);                           \
             goto cleanup;                                \
         }                                                \
     }
@@ -75,7 +71,6 @@
         void *tmp = NULL;                                \
         if (NULL == (tmp = realloc(_buffer, _len))) {    \
             ret = RET_MEMORY_ALLOC_ERROR;                \
-            ERROR_CREATE(ret);                           \
             goto cleanup;                                \
         }                                                \
         _out = tmp;                                      \
@@ -93,7 +88,6 @@
     {                                                    \
         if (!(_statement)) {                             \
             ret = RET_INVALID_PARAM;                     \
-            ERROR_CREATE(ret);                           \
             goto cleanup;                                \
         }                                                \
     }
@@ -110,7 +104,6 @@
     {                                                    \
         if (NULL == (_buffer)) {                         \
             ret = RET_INVALID_PARAM;                     \
-            ERROR_ADD(ret);                              \
             goto cleanup;                                \
         }                                                \
     }
@@ -125,7 +118,6 @@
  */
 #define SET_ERROR(_error_code)                           \
         ret = _error_code;                               \
-        ERROR_CREATE(ret);                               \
         goto cleanup;
 
 #endif

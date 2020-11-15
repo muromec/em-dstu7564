@@ -12,7 +12,6 @@
 #include "byte_array.h"
 /*#include "prng.h"*/
 #include "word_internal.h"
-#include "stacktrace.h"
 #include "cryptonite_errors.h"
 
 
@@ -128,8 +127,8 @@ unsigned int LOOP_NUM;
 #define PR(...)        printf(__VA_ARGS__); fflush(stdout)
 
 #define ASN_EXECUTE(ret) ASSERT_RET_OK(ret.code); goto cleanup;
-#define ASSERT_RET_OK(func) { int _ret = (func); if (_ret != RET_OK) { ERROR_ADD(_ret); assert_ret_ok_core(_ret, __FILE__, __LINE__); goto cleanup;} }
-#define ASSERT_RET(exp_ret, func) { int _ret = (func); if (_ret != exp_ret) { ERROR_ADD(_ret); assert_ret_core(exp_ret, _ret, __FILE__, __LINE__); goto cleanup;} }
+#define ASSERT_RET_OK(func) { int _ret = (func); if (_ret != RET_OK) { assert_ret_ok_core(_ret, __FILE__, __LINE__); goto cleanup;} }
+#define ASSERT_RET(exp_ret, func) { int _ret = (func); if (_ret != exp_ret) { assert_ret_core(exp_ret, _ret, __FILE__, __LINE__); goto cleanup;} }
 #define CHECK_EQUALS_BA(expected, actual) if (!assert_equals_ba_core(expected, actual, __FILE__, __LINE__)) goto cleanup
 #define ASSERT_EQUALS_BA(expected, actual) if (!assert_equals_ba_core(expected, actual, __FILE__, __LINE__)) return;
 #define ASSERT_EQUALS(expected, actual, size) if (!assert_equals_core(expected, actual, size, __FILE__, __LINE__)) return
@@ -189,7 +188,7 @@ void add_default_speed_measure(TableBuilder *ctx, char *measure_value);
 
 int read_from_file(const char *file, unsigned char **buffer, size_t *buffer_size);
 
-void error_print(const ErrorCtx *ctx);
+//void error_print(const ErrorCtx *ctx);
 
 /*PrngCtx *test_utils_get_prng(void); */
 

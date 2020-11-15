@@ -238,7 +238,6 @@ cleanup:
 int wa_copy(const WordArray *in, WordArray *out)
 {
     if (in == NULL || out == NULL || in->len > out->len) {
-        ERROR_CREATE(RET_INVALID_PARAM);
         return RET_INVALID_PARAM;
     }
 
@@ -255,7 +254,6 @@ int wa_copy(const WordArray *in, WordArray *out)
 int wa_copy_part(const WordArray *in, size_t off, size_t len, WordArray *out)
 {
     if (in == NULL || out == NULL || in->len < off + len || out->len != len || in == out) {
-        ERROR_CREATE(RET_INVALID_PARAM);
         return RET_INVALID_PARAM;
     }
 

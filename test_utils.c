@@ -99,7 +99,6 @@ bool assert_ret_ok_core(int ret, char *file, int line)
         }
         error_count++;
         PR("-------------------------------------------------------------------------------\n");
-        error_print(stacktrace_get_last());
         return false;
     }
 
@@ -115,7 +114,6 @@ bool assert_ret_core(int exp_ret, int act_ret, char *file, int line)
         PR("Actual  : 0x%04x\n", act_ret);
         error_count++;
         PR("-------------------------------------------------------------------------------\n");
-        error_print(stacktrace_get_last());
         return false;
     }
 
@@ -491,7 +489,7 @@ int read_from_file(const char *file, unsigned char **buffer, size_t *buffer_size
 
     return RET_OK;
 }
-
+/*
 void error_print(const ErrorCtx *ctx)
 {
     const ErrorCtx *step = NULL;
@@ -509,7 +507,7 @@ void error_print(const ErrorCtx *ctx)
         } while (step != NULL);
     }
     PR("%s\n", arr);
-}
+}*/
 
 /*PrngCtx *test_utils_get_prng(void)
 {

@@ -263,8 +263,6 @@ int ba_cmp(const ByteArray *a, const ByteArray *b)
         return memcmp(a->buf, b->buf, a->len);
     }
 
-    ERROR_CREATE(RET_INVALID_PARAM);
-
     return -1;
 }
 
@@ -278,7 +276,6 @@ const uint8_t *ba_get_buf(const ByteArray *ba)
     if (ba) {
         return ba->buf;
     }
-    ERROR_CREATE(RET_INVALID_PARAM);
 
     return NULL;
 }
