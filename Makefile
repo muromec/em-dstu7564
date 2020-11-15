@@ -5,7 +5,7 @@ CFLAGS=-I. -DCRYPTONITE_EXPORT=
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-utest: utest.o utest_dstu7564.o subrowcol.o byte_array.o byte_array_internal.o byte_utils_internal.o dstu7564.o test_utils.o
+utest: utest.o utest_dstu7564.o subrowcol.o byte_utils_internal.o dstu7564.o test_utils.o
 	$(CC) -o $@ $^
 
 clean:

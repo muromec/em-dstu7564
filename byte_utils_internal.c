@@ -42,48 +42,6 @@ const int big_endian_test = 1;
         }                                            \
     }
 
-#define swap_word32(in, out, size)              \
-    {                                           \
-        uint8_t *_in = (uint8_t *)(in);         \
-        uint8_t *_out = (uint8_t *)(out);       \
-        uint8_t _tmp[4];                        \
-        size_t _i;                              \
-        size_t _size = (size_t)(size);          \
-                                                \
-        for (_i = 0; _i < _size; _i += 4) {     \
-            _tmp[0] = _in[_i + 3];              \
-            _tmp[1] = _in[_i + 2];              \
-            _tmp[2] = _in[_i + 1];              \
-            _tmp[3] = _in[_i + 0];              \
-            _out[_i + 0] = _tmp[0];             \
-            _out[_i + 1] = _tmp[1];             \
-            _out[_i + 2] = _tmp[2];             \
-            _out[_i + 3] = _tmp[3];             \
-        }                                       \
-    }
-
-int uint8_to_uint32(const uint8_t *in, size_t in_len, uint32_t *out, size_t out_len)
-{
-    int ret = RET_OK;
-
-    CHECK_PARAM(in != NULL);
-    CHECK_PARAM(in_len != 0);
-    CHECK_PARAM(out != NULL);
-    CHECK_PARAM(out_len * UINT32_LEN >= in_len);
-
-    memcpy(out, in, in_len);
-    if (out_len * UINT32_LEN > in_len) {
-        memset((uint8_t *)out + in_len, 0, out_len * UINT32_LEN - in_len);
-    }
-
-    if (is_bigendian()) {
-        swap_word32(out, out, in_len);
-    }
-
-cleanup:
-
-    return ret;
-}
 
 int uint8_to_uint64(const uint8_t *in, size_t in_len, uint64_t *out, size_t out_len)
 {
@@ -130,33 +88,3 @@ cleanup:
 
     return ret;
 }
-
-
-int uint8_swap(const uint8_t *in, size_t in_len, uint8_t *out, size_t out_len)
-{
-    size_t i;
-    uint8_t tmp;
-    int ret = RET_OK;
-
-    CHECK_PARAM(in != NULL);
-    CHECK_PARAM(in_len != 0);
-    CHECK_PARAM(out != NULL);
-    CHECK_PARAM(out_len == in_len);
-
-    if (in == out) {
-        for (i = 0; i < out_len / 2; i++) {
-            tmp = out[i];
-            out[i] = out[out_len - 1 - i];
-            out[out_len - 1 - i] = tmp;
-        }
-    } else {
-        for (i = 0; i < out_len; i++) {
-            out[out_len - 1 - i] = in[i];
-        }
-    }
-
-cleanup:
-
-    return ret;
-}
-

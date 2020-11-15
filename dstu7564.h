@@ -5,8 +5,7 @@
 
 #ifndef CRYPTONITE_DSTU7564_H
 #define CRYPTONITE_DSTU7564_H
-
-#include "byte_array.h"
+#include <stdint.h>
 
 #ifdef  __cplusplus
 extern "C" {
@@ -32,7 +31,7 @@ CRYPTONITE_EXPORT Dstu7564Ctx *dstu7564_alloc(const Dstu7564SboxId sbox_id);
  * @param sbox користувацька таблиця замін розміром 1024 байт
  * @return контекст ДСТУ 7564
  */
-CRYPTONITE_EXPORT Dstu7564Ctx *dstu7564_alloc_user_sbox(const ByteArray *sbox);
+CRYPTONITE_EXPORT Dstu7564Ctx *dstu7564_alloc_user_sbox(const uint8_t *s_block_buf, size_t s_block_size);
 
 /**
  * Ініціалізація контексту DSTU7564.
@@ -47,10 +46,11 @@ CRYPTONITE_EXPORT int dstu7564_init(Dstu7564Ctx *ctx, size_t hash_len);
  * Модифікує геш-вектор фрагментом даних.
  *
  * @param ctx контекст ДСТУ 7564
- * @param data дані
+ * @param data_buf дані
+ * @param data_buf_len розмір даних у байтах
  * @return код помилки
  */
-CRYPTONITE_EXPORT int dstu7564_update(Dstu7564Ctx *ctx, const ByteArray *data);
+CRYPTONITE_EXPORT int dstu7564_update(Dstu7564Ctx *ctx, uint8_t *data_buf, size_t data_buf_len);
 
 /**
  * Завершує вироботку геша і повертає його значення.
@@ -59,7 +59,7 @@ CRYPTONITE_EXPORT int dstu7564_update(Dstu7564Ctx *ctx, const ByteArray *data);
  * @param hash геш від даних
  * @return код помилки
  */
-CRYPTONITE_EXPORT int dstu7564_final(Dstu7564Ctx *ctx, ByteArray **hash);
+CRYPTONITE_EXPORT int dstu7564_final(Dstu7564Ctx *ctx, uint8_t *hash);
 
 /**
  * Ініціалізує контекст ДСТУ 7564 для створення кода аутентификації.
@@ -69,16 +69,17 @@ CRYPTONITE_EXPORT int dstu7564_final(Dstu7564Ctx *ctx, ByteArray **hash);
  * @param mac_len розмір імітовставки (байт), значення 32, 48, 64
  * @return код помилки
  */
-CRYPTONITE_EXPORT int dstu7564_init_kmac(Dstu7564Ctx *ctx, const ByteArray *key, size_t mac_len);
+CRYPTONITE_EXPORT int dstu7564_init_kmac(Dstu7564Ctx *ctx, uint8_t *key, size_t key_len, size_t mac_len);
 
 /**
  * Модифікує геш-вектор фрагментом даних.
  *
  * @param ctx контекст ДСТУ 7564
  * @param data дані
+ * @param data_len розмір даних у байтах
  * @return код помилки
  */
-CRYPTONITE_EXPORT int dstu7564_update_kmac(Dstu7564Ctx *ctx, const ByteArray *data);
+CRYPTONITE_EXPORT int dstu7564_update_kmac(Dstu7564Ctx *ctx, uint8_t *data, size_t data_len);
 
 /**
  * Завершує вироботку геша і повертає його значення.
@@ -87,7 +88,7 @@ CRYPTONITE_EXPORT int dstu7564_update_kmac(Dstu7564Ctx *ctx, const ByteArray *da
  * @param mac код аутентификации
  * @return код помилки
  */
-CRYPTONITE_EXPORT int dstu7564_final_kmac(Dstu7564Ctx *ctx, ByteArray **mac);
+CRYPTONITE_EXPORT int dstu7564_final_kmac(Dstu7564Ctx *ctx, uint8_t *mac);
 
 /**
  * Звільняє контекст ДСТУ 7564.

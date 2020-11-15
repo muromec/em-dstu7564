@@ -6,11 +6,14 @@
 #ifndef CRYPTONITE_TEST_UTILS_H
 #define CRYPTONITE_TEST_UTILS_H
 
+#include <stdio.h>
+#include <string.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <stddef.h>
 #include <time.h>
 
-#include "byte_array.h"
-#include "byte_array_internal.h"
 #include "cryptonite_errors.h"
 
 
@@ -85,34 +88,6 @@ extern size_t error_count;
 extern char DOT_STRING80[];
 extern char WSPACE_STRING80[];
 
-unsigned int THREADS_NUM;
-
-typedef struct column_st {
-    char *name;
-    bool *is_failed;
-    double *time;
-    size_t *color;
-    struct column_st *next;
-} Column;
-
-typedef struct TableBuilder_st {
-    char **lib_name;
-    Column *column;
-    char default_speed_value[20];
-    size_t arg_num;
-    size_t col_num;
-    size_t lib_num;
-    size_t mode_num;
-    double begin_time_value;
-} TableBuilder;
-
-typedef struct {
-    char *key;
-    char *iv;
-    char *data;
-    char *expected;
-} TestHelper;
-
 typedef enum {
     GREEN,
     RED,
@@ -128,8 +103,6 @@ unsigned int LOOP_NUM;
 #define ASN_EXECUTE(ret) ASSERT_RET_OK(ret.code); goto cleanup;
 #define ASSERT_RET_OK(func) { int _ret = (func); if (_ret != RET_OK) { assert_ret_ok_core(_ret, __FILE__, __LINE__); goto cleanup;} }
 #define ASSERT_RET(exp_ret, func) { int _ret = (func); if (_ret != exp_ret) { assert_ret_core(exp_ret, _ret, __FILE__, __LINE__); goto cleanup;} }
-#define CHECK_EQUALS_BA(expected, actual) if (!assert_equals_ba_core(expected, actual, __FILE__, __LINE__)) goto cleanup
-#define ASSERT_EQUALS_BA(expected, actual) if (!assert_equals_ba_core(expected, actual, __FILE__, __LINE__)) return;
 #define ASSERT_EQUALS(expected, actual, size) if (!assert_equals_core(expected, actual, size, __FILE__, __LINE__)) return
 #define ASSERT_EQUALS_STR(expected, actual) if (!assert_equals_str_core(expected, actual, __FILE__, __LINE__)) return
 #define ASSERT_EQUALS_SIZE_T(expected, actual) if (!assert_equals_size_t_core(expected, actual,  __FILE__, __LINE__)) return
@@ -148,43 +121,13 @@ unsigned int LOOP_NUM;
 #define DEFAULT_CLOCKS_PS_VALUE 1000000
 #endif
 
-#define BA_FREE(...) ba_free_many(NARGS(__VA_ARGS__), __VA_ARGS__)
-
-
 bool assert_true_core(bool expression, char *file, int line);
 bool assert_ret_ok_core(int ret, char *file, int line);
 bool assert_ret_core(int exp_ret, int act_ret, char *file, int line);
-bool assert_equals_ba_core(ByteArray *expected, ByteArray *actual, char *file, int line);
 bool assert_equals_size_t_core(size_t expected, size_t actual, char *file, int line);
 bool assert_equals_str_core(const char *expected, const char *actual, char *file, int line);
 bool assert_equals_core(const void *expected, const void *actual, size_t size, char *file, int line);
 
-bool equals_ba(ByteArray *expected, ByteArray *actual);
-const char *location_cut(const char *file);
-
-ByteArray *ba_alloc_from_be_hex_string(const char *data);
-void ba_free_many(int num, ...);
-
-
-TableBuilder *table_builder_alloc(size_t lib_num);
-
-/*
- * value
- * если default_measure_value == MB\sec - value = начальное время
- * если default_measure_value == op\sec - value = количество итераций
- * */
-void add_time(TableBuilder *ctx, double value, size_t lib_index);
-double get_time(void);
-void table_builder_free(TableBuilder *ctx);
-void add_mode_name(TableBuilder *ctx, char *mode);
-void add_lib_name(TableBuilder *ctx, char *name);
-void add_error(TableBuilder *ctx, size_t lib_index);
-void add_default_speed_measure(TableBuilder *ctx, char *measure_value);
-
-int read_from_file(const char *file, unsigned char **buffer, size_t *buffer_size);
-
-//void error_print(const ErrorCtx *ctx);
-
-/*PrngCtx *test_utils_get_prng(void); */
+uint8_t *uint8_alloc_from_le_hex_string(const char *data, size_t* out_len);
 
 #endif

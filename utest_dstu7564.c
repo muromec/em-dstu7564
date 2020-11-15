@@ -3,6 +3,7 @@
  * Redistribution and modifications are permitted subject to BSD license.
  */
 
+#include <stdlib.h>
 #include "utest.h"
 #include "dstu7564.h"
 #include "cryptonite_errors.h"
@@ -79,132 +80,154 @@ static const uint8_t s_blocks[1024] = {
     0x64, 0x6d, 0xdc, 0xf0, 0x59, 0xa9, 0x4c, 0x17, 0x7f, 0x91, 0xb8, 0xc9, 0x57, 0x1b, 0xe0, 0x61
 };
 
+void print_hex(char* label, uint8_t *buffer, size_t len) {
+  printf("%s:\t", label);
+  for (size_t i = 0; i < len; i++)
+  {
+      printf("%02X", buffer[i]);
+  }
+  printf("\n");
+}
+
 static void test_dstu7564(void)
 {
-    ByteArray *data = ba_alloc_from_le_hex_string("");
-    ByteArray *expected = ba_alloc_from_le_hex_string(
-            "656b2f4cd71462388b64a37043ea55dbe445d452aecd46c3298343314ef04019bcfa3f04265a9857f91be91fce197096187ceda78c9c1c021c294a0689198538");
-    ByteArray *actual = NULL;
+    size_t data_len = 0;
+    uint8_t data[] = {};
+
+    size_t expected_len = -1;
+    uint8_t *expected = uint8_alloc_from_le_hex_string(
+            "656b2f4cd71462388b64a37043ea55dbe445d452aecd46c3298343314ef04019bcfa3f04265a9857f91be91fce197096187ceda78c9c1c021c294a0689198538", &expected_len);
+
+    uint8_t actual[64];
     Dstu7564Ctx *ctx = dstu7564_alloc(DSTU7564_SBOX_1);
 
     ASSERT_NOT_NULL(ctx);
     ASSERT_RET_OK(dstu7564_init(ctx, 64));
-    ASSERT_RET_OK(dstu7564_update(ctx, data));
-    ASSERT_RET_OK(dstu7564_final(ctx, &actual));
+    ASSERT_RET_OK(dstu7564_update(ctx, data, data_len));
+    ASSERT_RET_OK(dstu7564_final(ctx, actual));
 
-    ASSERT_EQUALS_BA(expected, actual);
+    ASSERT_EQUALS(expected, actual, expected_len);
+    print_hex("E", expected, 64);
+    print_hex("A", actual, 64);
 
-    ba_print(stdout, data);
-    ba_print(stdout, actual);
 cleanup:
 
     dstu7564_free(ctx);
-    ba_free(data);
-    ba_free(expected);
-    ba_free(actual);
+    free(expected);
 }
 
 static void test2_dstu7564(void)
 {
-    ByteArray *data =
-            ba_alloc_from_le_hex_string("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F");
-    ByteArray *expected = ba_alloc_from_le_hex_string(
-            "08F4EE6F1BE6903B324C4E27990CB24EF69DD58DBE84813EE0A52F6631239875");
-    ByteArray *actual = NULL;
+
+    size_t data_len = -1;
+    uint8_t *data =
+            uint8_alloc_from_le_hex_string("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F", &data_len);
+
+    size_t expected_len = -1;
+    uint8_t *expected = uint8_alloc_from_le_hex_string(
+            "08F4EE6F1BE6903B324C4E27990CB24EF69DD58DBE84813EE0A52F6631239875", &expected_len);
+    uint8_t actual[32];
     Dstu7564Ctx *ctx = dstu7564_alloc(DSTU7564_SBOX_1);
 
     ASSERT_NOT_NULL(ctx);
     ASSERT_RET_OK(dstu7564_init(ctx, 32));
-    ASSERT_RET_OK(dstu7564_update(ctx, data));
-    ASSERT_RET_OK(dstu7564_final(ctx, &actual));
+    ASSERT_RET_OK(dstu7564_update(ctx, data, data_len));
+    ASSERT_RET_OK(dstu7564_final(ctx, actual));
 
-    ASSERT_EQUALS_BA(expected, actual);
+    ASSERT_EQUALS(expected, actual, expected_len);
 
-    ba_print(stdout, data);
-    ba_print(stdout, actual);
+    print_hex("E", expected, 32);
+    print_hex("A", actual, 32);
 
 cleanup:
 
     dstu7564_free(ctx);
-    ba_free(data);
-    ba_free(expected);
-    ba_free(actual);
+    free(data);
+    free(expected);
 }
 
 static void test3_dstu7564(void)
 {
-    ByteArray *data =
-            ba_alloc_from_le_hex_string("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F"\
-                    "404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F606162636465666768696A6B6C6D6E6F707172737475767778797A7B7C7D7E7F");
-    ByteArray *expected = ba_alloc_from_le_hex_string(
-            "0A9474E645A7D25E255E9E89FFF42EC7EB31349007059284F0B182E452BDA882");
-    ByteArray *actual = NULL;
+    size_t data_len = -1;
+    uint8_t *data =
+            uint8_alloc_from_le_hex_string("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F"\
+                    "404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F606162636465666768696A6B6C6D6E6F707172737475767778797A7B7C7D7E7F", &data_len);
+    size_t expected_len = -1;
+    uint8_t *expected = uint8_alloc_from_le_hex_string(
+            "0A9474E645A7D25E255E9E89FFF42EC7EB31349007059284F0B182E452BDA882", &expected_len);
+    uint8_t actual[32];
     Dstu7564Ctx *ctx = dstu7564_alloc(DSTU7564_SBOX_1);
 
     ASSERT_NOT_NULL(ctx);
     ASSERT_RET_OK(dstu7564_init(ctx, 32));
-    ASSERT_RET_OK(dstu7564_update(ctx, data));
-    ASSERT_RET_OK(dstu7564_final(ctx, &actual));
+    ASSERT_RET_OK(dstu7564_update(ctx, data, data_len));
+    ASSERT_RET_OK(dstu7564_final(ctx, actual));
 
-    ASSERT_EQUALS_BA(expected, actual);
+    ASSERT_EQUALS(expected, actual, expected_len);
 
-    ba_print(stdout, data);
-    ba_print(stdout, actual);
+    print_hex("E", expected, 32);
+    print_hex("A", actual, 32);
 
 cleanup:
 
     dstu7564_free(ctx);
-    ba_free(data);
-    ba_free(expected);
-    ba_free(actual);
+    free(data);
+    free(expected);
 }
 
 static void test_dstu7564_user_sbox(void)
 {
-    ByteArray *data = ba_alloc_from_le_hex_string("");
-    ByteArray *expected = ba_alloc_from_le_hex_string("656b2f4cd71462388b64a37043ea55dbe445d452aecd46c3298343314ef04019b"
-            "cfa3f04265a9857f91be91fce197096187ceda78c9c1c021c294a0689198538");
-    ByteArray *actual = NULL;
-    ByteArray *sblocks = NULL;
+    size_t data_len = 0;
+    uint8_t data[] = {};
+    size_t expected_len = -1;
+    uint8_t *expected = uint8_alloc_from_le_hex_string("656b2f4cd71462388b64a37043ea55dbe445d452aecd46c3298343314ef04019b"
+            "cfa3f04265a9857f91be91fce197096187ceda78c9c1c021c294a0689198538", &expected_len);
+    uint8_t actual[64];
     Dstu7564Ctx *ctx =  NULL;
-    ASSERT_NOT_NULL(sblocks = ba_alloc_from_uint8(s_blocks, sizeof(s_blocks)));
-
-    ASSERT_NOT_NULL(ctx = dstu7564_alloc_user_sbox(sblocks));
+    ASSERT_NOT_NULL(ctx = dstu7564_alloc_user_sbox(s_blocks, sizeof s_blocks));
     ASSERT_RET_OK(dstu7564_init(ctx, 64));
-    ASSERT_RET_OK(dstu7564_update(ctx, data));
-    ASSERT_RET_OK(dstu7564_final(ctx, &actual));
+    ASSERT_RET_OK(dstu7564_update(ctx, data, data_len));
+    ASSERT_RET_OK(dstu7564_final(ctx, actual));
 
-    ASSERT_EQUALS_BA(expected, actual);
+    ASSERT_EQUALS(expected, actual, expected_len);
+
+    print_hex("E", expected, 64);
+    print_hex("A", actual, 64);
 
 cleanup:
 
     dstu7564_free(ctx);
 
-    BA_FREE(data, sblocks, expected, actual);
+    free(expected);
 }
 
 static void test_dstu7564_hmac(void)
 {
-    ByteArray *data = ba_alloc_from_str("Hello World");
-    ByteArray *key = ba_alloc_from_le_hex_string("707172737475767778797a7b7c7d7e7f80818283");
-    ByteArray *exp = ba_alloc_from_le_hex_string("ac9b3027afaa041cb623b098d51200801432290afa30311d11b2450f3d95d98a");
-    ByteArray *hmac = NULL;
+    uint8_t data[] = "Hello World";
+    size_t key_len = -1;
+    uint8_t *key = uint8_alloc_from_le_hex_string("707172737475767778797a7b7c7d7e7f80818283", &key_len);
+
+    size_t exp_len = -1;
+    uint8_t *exp = uint8_alloc_from_le_hex_string("ac9b3027afaa041cb623b098d51200801432290afa30311d11b2450f3d95d98a", &exp_len);
+
+    uint8_t hmac[32];
     Dstu7564Ctx *ctx = NULL;
 
     ASSERT_NOT_NULL(ctx = dstu7564_alloc(DSTU7564_SBOX_1));
-    ASSERT_RET_OK(dstu7564_init_kmac(ctx, key, 32));
-    ASSERT_RET_OK(dstu7564_update_kmac(ctx, data));
-    ASSERT_RET_OK(dstu7564_final_kmac(ctx, &hmac));
+    ASSERT_RET_OK(dstu7564_init_kmac(ctx, key, key_len, 32));
+    ASSERT_RET_OK(dstu7564_update_kmac(ctx, data, (sizeof data) - 1));
+    ASSERT_RET_OK(dstu7564_final_kmac(ctx, hmac));
 
-    ASSERT_EQUALS_BA(exp, hmac);
+    ASSERT_EQUALS(exp, hmac, exp_len);
+
+    print_hex("E", exp, 32);
+    print_hex("A", hmac, 32);
 
 
 cleanup:
 
-    ba_free(exp);
-    ba_free(data);
-    ba_free(hmac);
-    ba_free(key);
+    free(exp);
+    free(key);
     dstu7564_free(ctx);
 }
 

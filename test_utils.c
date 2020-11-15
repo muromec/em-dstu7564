@@ -15,8 +15,8 @@
 #include <unistd.h>
 #endif
 
-#include "byte_array.h"
 #include "test_utils.h"
+#include "macros_internal.h"
 
 size_t error_count = 0;
 int success_count = 0;
@@ -196,88 +196,45 @@ bool assert_equals_ptr_core(void *expected, void *actual, char *file, int line)
     return true;
 }
 
-bool assert_equals_ba_core(ByteArray *expected, ByteArray *actual, char *file, int line)
+
+bool is_char_0_f(char ch)
 {
-    return (expected != NULL && actual != NULL)
-            ? (assert_equals_size_t_core(ba_get_len(expected), ba_get_len(actual), file, line))
-            && (assert_equals_core(ba_get_buf(expected), ba_get_buf(actual), ba_get_len(actual), file, line))
-            : (assert_equals_ptr_core(expected, actual, file, line));
+    return (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F') || (ch >= '0' && ch <= '9');
 }
 
-bool equals_ba(ByteArray *expected, ByteArray *actual)
+uint8_t *uint8_alloc_from_le_hex_string(const char *data, size_t* out_len)
 {
-    if (expected == actual) {
-        return true;
-    }
-
-    if (expected == NULL || actual == NULL) {
-        error_count++;
-        return false;
-    }
-
-    if (expected->len != actual->len) {
-        error_count++;
-        return false;
-    }
-
-    if (memcmp(expected->buf, actual->buf, actual->len)) {
-        error_count++;
-        return false;
-    }
-
-    return true;
-}
-
-void ba_free_many(int num, ...)
-{
-    int i;
-    va_list args;
-
-    va_start(args, num);
-    for (i = 0; i < num; i++) {
-        ba_free(va_arg(args, ByteArray *));
-    }
-    va_end(args);
-}
-
-
-
-ByteArray *ba_alloc_from_be_hex_string(const char *data)
-{
-    ByteArray *out_ba = NULL;
     uint8_t *out = NULL;
-    char *data_ext = NULL;
-    size_t i;
     char tmp[3] = {0};
+    size_t i;
     size_t len;
+    int ret = RET_OK;
 
-    if (!data) {
-        return NULL;
-    }
+    CHECK_PARAM(data != NULL);
 
     len = strlen(data);
     if (len % 2 != 0) {
-        data_ext = malloc(len + 1);
-        data_ext[0] = '0';
-        memcpy(data_ext + 1, data, len);
-        len++;
-    } else {
-        data_ext = malloc(len + 1);
-        data_ext = strcpy(data_ext, data);
-        data_ext[len] = '\0';
+        SET_ERROR(RET_INVALID_HEX_STRING);
     }
 
-    out = malloc(len / 2);
+    MALLOC_CHECKED(out, len / 2);
 
     for (i = 0; i < len / 2; i++) {
-        memcpy(tmp, data_ext + 2 * i, 2);
-        out[len / 2 - 1 - i] = (uint8_t) strtol(tmp, NULL, 16);
+        if (!is_char_0_f(data[2 * i]) || !is_char_0_f(data[2 * i + 1])) {
+            SET_ERROR(RET_INVALID_HEX_STRING);
+        }
+        memcpy(tmp, data + 2 * i, 2);
+        out[i] = (uint8_t) strtol(tmp, NULL, 16);
     }
 
-    out_ba = ba_alloc_from_uint8(out, len / 2);
+    *out_len = len / 2;
 
-    free(data_ext);
-    free(out);
+    return out;
 
-    return out_ba;
+cleanup:
+    if(out) {
+        free(out);
+    }
+    return NULL;
 }
+

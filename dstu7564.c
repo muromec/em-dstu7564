@@ -9,7 +9,6 @@
 
 #include "dstu7564.h"
 #include "byte_utils_internal.h"
-#include "byte_array_internal.h"
 #include "macros_internal.h"
 
 #undef FILE_MARKER
@@ -518,7 +517,7 @@ static __inline void digest(Dstu7564Ctx *ctx, uint8_t *data)
     dstu7564_xor(ctx->state, temp2, ctx->state, ctx->columns);
 }
 
-static __inline int output_transformation(Dstu7564Ctx *ctx, ByteArray **hash_code)
+static __inline int output_transformation(Dstu7564Ctx *ctx, uint8_t *hash)
 {
     uint8_t temp[NB_1024 * ROWS];
     int ret = 0;
@@ -529,7 +528,7 @@ static __inline int output_transformation(Dstu7564Ctx *ctx, ByteArray **hash_cod
 
     dstu7564_xor(ctx->state, temp, ctx->state, ctx->columns);
 
-    CHECK_NOT_NULL(*hash_code = ba_alloc_from_uint8(ctx->state + ctx->nbytes - ctx->hash_nbytes, ctx->hash_nbytes));
+    memcpy(hash, ctx->state + ctx->nbytes - ctx->hash_nbytes, ctx->hash_nbytes);
     dstu7564_init(ctx, ctx->hash_nbytes);
 
 cleanup:
@@ -563,15 +562,12 @@ cleanup:
     return ctx;
 }
 
-Dstu7564Ctx *dstu7564_alloc_user_sbox(const ByteArray *sblocks)
+Dstu7564Ctx *dstu7564_alloc_user_sbox(const uint8_t *s_block_buf, size_t s_block_size)
 {
     Dstu7564Ctx *ctx = NULL;
-    uint8_t *s_block_buf = NULL;
-    size_t s_block_size;
     int ret = 0;
 
-    CHECK_PARAM(sblocks != NULL);
-    DO(ba_to_uint8_with_alloc(sblocks, &s_block_buf, &s_block_size));
+    CHECK_PARAM(s_block_buf != NULL);
     CHECK_PARAM(s_block_size == SBOX_LEN);
 
     CALLOC_CHECKED(ctx, sizeof (Dstu7564Ctx));
@@ -580,8 +576,6 @@ Dstu7564Ctx *dstu7564_alloc_user_sbox(const ByteArray *sblocks)
     ctx->is_inited = false;
 
 cleanup:
-
-    free(s_block_buf);
 
     return ctx;
 }
@@ -631,24 +625,20 @@ cleanup:
     return ret;
 }
 
-int dstu7564_update(Dstu7564Ctx *ctx, const ByteArray *data)
+int dstu7564_update(Dstu7564Ctx *ctx, uint8_t *data_buf, size_t data_buf_len)
 {
     int ret = 0;
-    uint8_t *data_buf = NULL;
     uint8_t *shifted_buf;
-    size_t data_buf_len;
     size_t block_size;
     size_t i = 0;
 
     CHECK_PARAM(ctx != NULL);
-    CHECK_PARAM(data != NULL);
+    CHECK_PARAM(data_buf != NULL);
+    CHECK_PARAM(data_buf_len >= 0);
 
     if (ctx->is_inited == false) {
         SET_ERROR(-1);
     }
-
-    data_buf = data->buf;
-    data_buf_len = data->len;
 
     block_size = ctx->nbytes;
 
@@ -679,43 +669,42 @@ cleanup:
     return ret;
 }
 
-int dstu7564_final(Dstu7564Ctx *ctx, ByteArray **hash_code)
+int dstu7564_final(Dstu7564Ctx *ctx, uint8_t *hash)
 {
     int ret = 0;
 
     CHECK_PARAM(ctx != NULL);
-    CHECK_PARAM(hash_code != NULL);
+    CHECK_PARAM(hash != NULL);
     if (ctx->is_inited == false) {
         SET_ERROR(-1);
     }
 
     padding(ctx->last_block, ctx->last_block_el, ctx->msg_tot_len, ctx->nbytes);
     digest(ctx, ctx->last_block);
-    DO(output_transformation(ctx, hash_code));
+    DO(output_transformation(ctx, hash));
 
 cleanup:
 
     return ret;
 }
 
-int dstu7564_init_kmac(Dstu7564Ctx *ctx, const ByteArray *key, size_t mac_len)
+int dstu7564_init_kmac(Dstu7564Ctx *ctx, uint8_t *key, size_t key_buf_len, size_t mac_len)
 {
     uint8_t key_buf[STATE_BYTE_SIZE_1024];
-    size_t key_buf_len;
     size_t i;
     int ret = 0;
 
     CHECK_PARAM(ctx != NULL);
     CHECK_PARAM(key != NULL);
+    CHECK_PARAM(key_buf_len <= STATE_BYTE_SIZE_1024);
     CHECK_PARAM(mac_len == 32 || mac_len == 48 || mac_len == 64);
 
     /*HMAC(M,K) = H(PAD(K) || PAD(M) || (~K))*/
     DO(dstu7564_init(ctx, mac_len));
 
     CALLOC_CHECKED(ctx->hmac, sizeof(Dstu7564Hmac));
-    key_buf_len = ba_get_len(key);
 
-    DO(ba_to_uint8(key, key_buf, key_buf_len));
+    memcpy(key_buf, key, key_buf_len);
     ctx->hmac->key_len = key_buf_len;
 
     memset(ctx->hmac->invert_key, 0, ctx->nbytes);
@@ -741,21 +730,21 @@ cleanup:
     return ret;
 }
 
-int dstu7564_update_kmac(Dstu7564Ctx *ctx, const ByteArray *data)
+int dstu7564_update_kmac(Dstu7564Ctx *ctx, uint8_t *data, size_t data_len)
 {
     int ret = 0;
     if (ctx->is_inited == false) {
         SET_ERROR(-1);
     }
 
-    DO(dstu7564_update(ctx, data));
+    DO(dstu7564_update(ctx, data, data_len));
 
 cleanup:
 
     return ret;
 }
 
-int dstu7564_final_kmac(Dstu7564Ctx *ctx, ByteArray **mac)
+int dstu7564_final_kmac(Dstu7564Ctx *ctx, uint8_t *mac)
 {
     size_t msg_len;
     int ret = 0;
